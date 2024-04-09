@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Response,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,12 +32,36 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Response() response,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    try {
+      const res = this.userService.update(+id, updateUserDto);
+      if (res)
+        return response
+          .status(200)
+          .json({ message: 'User updated successfully' });
+    } catch (err) {
+      return response
+        .status(500)
+        .json({ error: err.message, message: 'Failed to update user' });
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  remove(@Response() response, @Param('id') id: string) {
+    try {
+      const res = this.userService.remove(+id);
+      if (res)
+        return response
+          .status(200)
+          .json({ message: 'User Deleted successfully' });
+    } catch (err) {
+      return response
+        .status(500)
+        .json({ error: err.message, message: 'Failed to delete user' });
+    }
   }
 }
